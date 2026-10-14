@@ -3,7 +3,7 @@ package dev.sleepguard.notifications
 import android.app.Notification
 import android.content.Context
 import android.os.Bundle
-import android.os.UserHandle
+import android.os.Process
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
@@ -48,12 +48,23 @@ class NotificationTextExtractorTest {
         val style = NotificationCompat.MessagingStyle(self).setConversationTitle("Production").setGroupConversation(true)
             .addMessage("Sakib Esrat first", 100, sender).addMessage("Deployment complete", 200, sender)
         val n = NotificationCompat.Builder(context, "test").setSmallIcon(android.R.drawable.ic_dialog_info).setStyle(style).build()
-        val sbn = StatusBarNotification("com.microsoft.teams", "com.microsoft.teams", 1, null, 1000, 0, n, UserHandle.of(0), null, 300)
+        val sbn = StatusBarNotification("com.microsoft.teams", "com.microsoft.teams", 1, null, 1000, 0, 0, n, Process.myUserHandle(), 300)
         val events = extractor.extract(sbn)
         assertEquals(2, events.size); assertEquals("John Smith", events.first().sender)
         assertEquals("Production", events.first().conversation)
         assertTrue(events.first().fields.any { it.text == "Sakib Esrat first" })
         assertFalse(events.last().fields.any { it.text.contains("Sakib Esrat") })
         assertNotEquals(events.first().messageIdentity, events.last().messageIdentity)
+    }
+    @Test fun rawMessageBundlesWithoutStyleMetadataAreExtracted() {
+        val context: Context = RuntimeEnvironment.getApplication()
+        val n = NotificationCompat.Builder(context, "test").setSmallIcon(android.R.drawable.ic_dialog_info).build()
+        n.extras.putParcelableArray(Notification.EXTRA_MESSAGES, arrayOf(Bundle().apply {
+            putCharSequence("text", "Sakib Esrat raw message"); putLong("time", 100); putCharSequence("sender", "John Smith")
+        }))
+        val sbn = StatusBarNotification("com.Slack", "com.Slack", 1, null, 1000, 0, 0, n, Process.myUserHandle(), 300)
+        val events = extractor.extract(sbn)
+        assertEquals("John Smith", events.single().sender)
+        assertEquals("Sakib Esrat raw message", events.single().fields.first().text)
     }
 }

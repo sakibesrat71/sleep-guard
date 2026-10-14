@@ -14,18 +14,19 @@ class NotificationProcessor(
             MonitoredApps.supported.none { it.packageName == event.packageName } ||
             !ScheduleChecker.isActive(settings.schedule, time)) return null
         val match = matcher.match(event.fields, settings.keywords) ?: return null
-        val content = event.fields.joinToString("\n") { normalize(it.text) }
+        val message = event.fields.firstOrNull { it.name == "message" }?.text
+            ?: event.fields.firstOrNull { it.name == "big text" }?.text
+            ?: event.fields.firstOrNull { it.name == "text" }?.text
+        // Cosmetic summary / badge-count updates must not change an otherwise identical message identity.
+        val content = message?.let(::normalize) ?: event.fields.joinToString("\n") { normalize(it.text) }
         val fingerprint = DuplicateDetector.fingerprint(event.packageName, event.key, event.sender,
             event.conversation, event.messageIdentity ?: content)
         if (!duplicates.accept(fingerprint, elapsed)) return null
         // Unknown conversations never suppress unrelated messages via a guessed shared key.
         val conversationKey = event.conversation?.let { "${event.packageName}:$it" }
         if (!cooldown.accept(conversationKey, settings.cooldownMinutes, elapsed)) return null
-        val message = event.fields.firstOrNull { it.name == "message" }?.text
-            ?: event.fields.firstOrNull { it.name == "big text" }?.text
-            ?: event.fields.firstOrNull { it.name == "text" }?.text ?: match.field.text
         return AlertTrigger(UUID.randomUUID().toString(), event.receivedAt, event.packageName,
             MonitoredApps.label(event.packageName), event.sender, event.conversation,
-            match.keyword.text, match.field.name, message.take(8192))
+            match.keyword.text, match.field.name, (message ?: match.field.text).take(8192))
     }
 }

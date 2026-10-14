@@ -1,6 +1,7 @@
 package dev.sleepguard.alarm
 
 import android.app.PendingIntent
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import dev.sleepguard.GuardApplication
@@ -36,13 +37,18 @@ class AlarmController(private val app: GuardApplication) {
         startRestricted = true
         AlarmNotifications(app).publish(state.value.last(), restricted = true)
     }
-    fun stop() {
+    // stopService compares the resolved ComponentName, not Intent object identity (lint SAM false positive).
+    @SuppressLint("ImplicitSamInstance")
+    fun stop(onDismissed: () -> Unit = {}) {
         val ids = state.value.map { it.id }.toSet()
         state.value = emptyList()
         destinations.clear()
         app.stopService(Intent(app, AlarmService::class.java))
         AlarmNotifications(app).cancel()
-        app.scope.launch { app.history.dismiss(ids) }
+        app.scope.launch {
+            try { app.history.dismiss(ids) } catch (_: java.io.IOException) { /* Audio already stopped; history write failed. */ }
+            finally { onDismissed() }
+        }
     }
     fun serviceDestroyed() { serviceRunning = false }
     fun openSource(alert: AlertTrigger) {

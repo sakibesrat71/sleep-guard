@@ -9,6 +9,7 @@ import dev.sleepguard.model.NotificationEvent
 import dev.sleepguard.model.TextField
 
 class NotificationTextExtractor {
+    private data class VisibleMessage(val text: CharSequence?, val timestamp: Long, val sender: String?)
     private val standard = linkedMapOf(
         Notification.EXTRA_TITLE to "title", Notification.EXTRA_TEXT to "text",
         Notification.EXTRA_BIG_TEXT to "big text", Notification.EXTRA_SUB_TEXT to "sub text",
@@ -34,17 +35,34 @@ class NotificationTextExtractor {
             }
         return result.filter { normalize(it.text).isNotEmpty() }.distinctBy { normalize(it.text) }
     }
+    @Suppress("DEPRECATION")
     fun extract(sbn: StatusBarNotification): List<NotificationEvent> {
         val n = sbn.notification
         val extras = n.extras ?: Bundle.EMPTY
-        val conversation = runCatching { extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString() }.getOrNull()
         val style = runCatching { NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(n) }.getOrNull()
-        val messages = style?.messages.orEmpty()
+        val conversation = runCatching { extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString() }.getOrNull()
+            ?: style?.conversationTitle?.toString()
+        val messages = style?.messages.orEmpty().map {
+            VisibleMessage(it.text, it.timestamp, it.person?.name?.toString() ?: it.sender?.toString())
+        }.ifEmpty {
+            // Some applications provide EXTRA_MESSAGES without the MessagingStyle template metadata.
+            runCatching {
+                val bundles = extras.getParcelableArray(Notification.EXTRA_MESSAGES) ?: return@runCatching emptyList()
+                bundles.mapNotNull { value ->
+                    val bundle = value as? Bundle ?: return@mapNotNull null
+                    runCatching {
+                        val text = bundle.getCharSequence("text") ?: return@runCatching null
+                        val person = bundle.getParcelable<android.app.Person>("sender_person")
+                        VisibleMessage(text, bundle.getLong("time"), person?.name?.toString() ?: bundle.getCharSequence("sender")?.toString())
+                    }.getOrNull()
+                }
+            }.getOrDefault(emptyList())
+        }
         if (messages.isNotEmpty()) {
             // Each message is its own event. Aggregated EXTRA_TEXT/BIG_TEXT may contain old messages.
             return messages.mapNotNull { message ->
                 val text = message.text?.toString()?.take(16_384) ?: return@mapNotNull null
-                val sender = message.person?.name?.toString() ?: message.sender?.toString()
+                val sender = message.sender
                 val parts = buildList {
                     add(TextField("message", text))
                     sender?.let { add(TextField("sender", it)) }

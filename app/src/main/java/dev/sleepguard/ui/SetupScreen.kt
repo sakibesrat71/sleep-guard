@@ -1,12 +1,11 @@
 package dev.sleepguard.ui
 
-import android.Manifest
 import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
-import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -32,9 +31,10 @@ fun setupStatus(context: Context): SetupStatus {
 }
 fun openSettings(context: Context, action: String, withPackage: Boolean = false) {
     val intent = Intent(action)
-    if (withPackage) intent.data = Uri.parse("package:${context.packageName}")
+    if (withPackage) intent.data = "package:${context.packageName}".toUri()
+    if (action == Settings.ACTION_APP_NOTIFICATION_SETTINGS) intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
     if (runCatching { context.startActivity(intent) }.isFailure)
-        runCatching { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))) }
+        runCatching { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())) }
 }
 @Composable fun SetupScreen(context: Context, status: SetupStatus, requestNotifications: () -> Unit) {
     Section("Alarm readiness") {

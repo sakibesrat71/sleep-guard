@@ -7,6 +7,7 @@ import dev.sleepguard.GuardApplication
 
 class StopAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        (context.applicationContext as GuardApplication).alarms.stop()
+        val pending = goAsync()
+        (context.applicationContext as GuardApplication).alarms.stop { pending.finish() }
     }
 }

@@ -39,4 +39,10 @@ class NotificationProcessorTest {
     @Test fun allDayOverridesSleepRestriction() {
         assertNotNull(process(NotificationProcessor(), event("Sakib Esrat"), settings.copy(schedule = SleepSchedule(600, 700, true))))
     }
+    @Test fun cosmeticSummaryUpdatesDoNotRetriggerSameBody() {
+        val p = NotificationProcessor()
+        val e = event("Sakib Esrat test").copy(fields = listOf(TextField("text", "Sakib Esrat test"), TextField("summary", "1 message")))
+        assertNotNull(process(p, e))
+        assertNull(process(p, e.copy(fields = listOf(TextField("text", "Sakib Esrat test"), TextField("summary", "2 messages")))))
+    }
 }

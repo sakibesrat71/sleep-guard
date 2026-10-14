@@ -11,7 +11,8 @@
         <package android:name="com.Slack" />
     </queries>
     <application android:name=".GuardApplication" android:label="Sleep Guard" android:theme="@style/Theme.SleepGuard"
-        android:allowBackup="false" android:supportsRtl="true">
+        android:icon="@mipmap/ic_launcher" android:allowBackup="false" android:supportsRtl="true"
+        android:fullBackupContent="@xml/backup_rules" android:dataExtractionRules="@xml/data_extraction_rules">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

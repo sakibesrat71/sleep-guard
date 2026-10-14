@@ -24,7 +24,7 @@ Built as a Kotlin / Jetpack Compose portfolio project with explicit platform lim
 
 The installed application has **no INTERNET permission**. Notification contents never leave the device. There are no accounts, analytics, advertising SDKs, Firebase, cloud databases, AI APIs, Teams/Slack authentication, Accessibility access, scraping, or database inspection. Build-time dependency downloads and GitHub CI do not process personal notifications.
 
-Settings and history use Preferences DataStore in private app storage. History deliberately contains available sender and message details; clear it in Recent Alerts. Android backup is disabled. Uninstalling deletes app data. Full-screen alarm details can be visible on the lock screen; notification previews omit message bodies. Debug logs contain only generic processing outcomes, not message text or exception details.
+Settings and history use Preferences DataStore in private app storage. History deliberately contains available sender and message details; clear it in Recent Alerts. Android backup is disabled, with explicit exclusions for cloud backup and device transfer. Uninstalling deletes app data. Full-screen alarm details can be visible on the lock screen; notification previews omit message bodies. Debug logs contain only generic processing outcomes, not message text or exception details.
 
 Notification Access is a broad Android grant. Sleep Guard checks the supported / selected package before extracting text. Supported package names are [`com.microsoft.teams`](https://play.google.com/store/apps/details?id=com.microsoft.teams) and [`com.Slack`](https://play.google.com/store/apps/details?id=com.Slack).
 
