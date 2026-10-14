@@ -1,5 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:label="Sleep Guard" android:theme="@style/Theme.SleepGuard"
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <queries>
+        <package android:name="com.microsoft.teams" />
+        <package android:name="com.Slack" />
+    </queries>
+    <application android:name=".GuardApplication" android:label="Sleep Guard" android:theme="@style/Theme.SleepGuard"
         android:allowBackup="false" android:supportsRtl="true">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
@@ -7,5 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".alarm.AlarmActivity" android:exported="false" android:excludeFromRecents="true"
+            android:launchMode="singleTop" android:showWhenLocked="true" android:turnScreenOn="true" />
+        <service android:name=".notifications.SleepGuardNotificationListenerService" android:exported="true"
+            android:label="Sleep Guard" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>
+        </service>
+        <service android:name=".alarm.AlarmService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
+        <receiver android:name=".alarm.StopAlarmReceiver" android:exported="false" />
     </application>
 </manifest>
