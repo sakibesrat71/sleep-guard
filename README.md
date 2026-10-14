@@ -151,6 +151,8 @@ Run on your Samsung S24 Ultra; record Android / One UI versions and actual resul
 
 Automated tests cover schedule boundaries, normalized matching, duplicates/expiry, cooldown, notification gates, the central deployment-mention example, defensive extras parsing, and MessagingStyle separation. Automated checks cannot validate Samsung audio, lock screen, DND, notification delivery, or overnight battery behaviour.
 
+See the [V1 validation record](docs/VALIDATION.md) for the actual local build, 24 passing tests, lint findings, APK signature checks, and remaining hardware tests.
+
 ## Scope
 
 V1 intentionally has no AI, accounts, cloud sync, authentication integrations, machine learning, or notification-history scraping. Adding a monitored app requires updating the registry, package visibility, UI documentation, and tests. Reliable local detection and explicit platform limitations take priority over extra features.
