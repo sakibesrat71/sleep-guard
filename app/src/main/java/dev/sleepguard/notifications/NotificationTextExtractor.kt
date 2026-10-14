@@ -44,7 +44,7 @@ class NotificationTextExtractor {
             // Each message is its own event. Aggregated EXTRA_TEXT/BIG_TEXT may contain old messages.
             return messages.mapNotNull { message ->
                 val text = message.text?.toString()?.take(16_384) ?: return@mapNotNull null
-                val sender = message.senderPerson?.name?.toString() ?: message.sender?.toString()
+                val sender = message.person?.name?.toString() ?: message.sender?.toString()
                 val parts = buildList {
                     add(TextField("message", text))
                     sender?.let { add(TextField("sender", it)) }
@@ -62,3 +62,4 @@ class NotificationTextExtractor {
             parts.firstOrNull { it.name == "title" }?.text, conversation, parts))
     }
 }
+
