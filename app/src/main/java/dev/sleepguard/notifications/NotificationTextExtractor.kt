@@ -3,6 +3,7 @@ package dev.sleepguard.notifications
 import android.app.Notification
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
+import androidx.core.app.NotificationCompat
 import dev.sleepguard.logic.normalize
 import dev.sleepguard.model.NotificationEvent
 import dev.sleepguard.model.TextField
@@ -37,7 +38,7 @@ class NotificationTextExtractor {
         val n = sbn.notification
         val extras = n.extras ?: Bundle.EMPTY
         val conversation = runCatching { extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE)?.toString() }.getOrNull()
-        val style = runCatching { Notification.MessagingStyle.extractMessagingStyleFromNotification(n) }.getOrNull()
+        val style = runCatching { NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification(n) }.getOrNull()
         val messages = style?.messages.orEmpty()
         if (messages.isNotEmpty()) {
             // Each message is its own event. Aggregated EXTRA_TEXT/BIG_TEXT may contain old messages.
