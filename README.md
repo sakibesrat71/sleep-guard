@@ -153,7 +153,15 @@ Automated tests cover schedule boundaries, normalized matching, duplicates/expir
 
 See the [V1 validation record](docs/VALIDATION.md) for the actual local build, 24 passing tests, lint findings, APK signature checks, and remaining hardware tests.
 
-## Scope
+## Play release preparation
+
+Release candidate 1.0.1 (version code 2) adds explicit local notification-processing consent and empty keywords for new installations. Saved user keywords are retained; upgraded installations must accept the disclosure in Setup before notification monitoring resumes.
+
+Approved store materials and outstanding enrollment steps are in [play-store/submission-notes.md](play-store/submission-notes.md). The public policy source is [docs/privacy.html](docs/privacy.html). Release checks and signing custody are documented in [play-store/RELEASE-VALIDATION.md](play-store/RELEASE-VALIDATION.md). No Play publication is claimed.
+
+For a signed local build on the original Windows account, run `scripts/build-play-release.ps1` with the separately stored private signing directory. Never commit signing files or passwords. New Play users should enroll Google Play App Signing; the upload certificate is separate from the distribution certificate.
+
+## V1 scope
 
 V1 intentionally has no AI, accounts, cloud sync, authentication integrations, machine learning, or notification-history scraping. Adding a monitored app requires updating the registry, package visibility, UI documentation, and tests. Reliable local detection and explicit platform limitations take priority over extra features.
 
