@@ -12,6 +12,8 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import dev.sleepguard.model.GuardSettings
 import dev.sleepguard.alarm.AlarmNotifications
 import dev.sleepguard.notifications.SleepGuardNotificationListenerService
 
@@ -36,11 +38,29 @@ fun openSettings(context: Context, action: String, withPackage: Boolean = false)
     if (runCatching { context.startActivity(intent) }.isFailure)
         runCatching { context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())) }
 }
-@Composable fun SetupScreen(context: Context, status: SetupStatus, requestNotifications: () -> Unit) {
+@Composable fun SetupScreen(context: Context, status: SetupStatus, requestNotifications: () -> Unit,
+    settings: GuardSettings, update: SettingsChange) {
+    var showDisclosure by remember { mutableStateOf(false) }
+    if (showDisclosure) AlertDialog(onDismissRequest = { showDisclosure = false },
+        title = { Text("Allow local notification processing?") },
+        text = { Text("Sleep Guard accesses notification text, sender names, and conversation details from your selected Teams and Slack apps, including while the app is closed or your phone is locked. It uses this information on your phone to match your keywords and trigger an alarm during your chosen monitoring times. Up to 100 matching alerts, including message text, are saved in private storage until cleared or replaced. Alarm details may be visible on the lock screen. Nothing is sent to a server, shared with advertisers, or used for analytics. Android Notification Access is broader than the apps Sleep Guard processes. You can decline, revoke Notification Access in Android settings, and clear saved alerts in Recent Alerts.") },
+        confirmButton = { TextButton(onClick = {
+            update { it.copy(notificationDisclosureAccepted = true) }
+            showDisclosure = false
+            openSettings(context, Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        }) { Text("Agree and continue") } },
+        dismissButton = { TextButton(onClick = { showDisclosure = false }) { Text("Not now") } })
     Section("Alarm readiness") {
         Text("Return here after changing Android settings to refresh these checks.")
         Text("Notification Access: ${if (status.listener) "granted" else "missing"}")
-        Button(onClick = { openSettings(context, Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) }) { Text("Grant Notification Access") }
+        Text("Local notification processing consent: ${if (settings.notificationDisclosureAccepted) "accepted" else "required before monitoring"}")
+        Button(onClick = {
+            if (settings.notificationDisclosureAccepted) openSettings(context, Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            else showDisclosure = true
+        }) { Text("Grant Notification Access") }
+        if (settings.notificationDisclosureAccepted) TextButton(onClick = {
+            update { it.copy(enabled = false, notificationDisclosureAccepted = false) }
+        }) { Text("Withdraw processing consent and disable guard") }
         Text("Notification permission: ${if (status.notifications) "enabled" else "disabled"}")
         Button(onClick = requestNotifications) { Text("Allow notifications") }
         Text("Battery optimisation: ${if (status.batteryExempt) "exempt" else "background alarms may be blocked"}")

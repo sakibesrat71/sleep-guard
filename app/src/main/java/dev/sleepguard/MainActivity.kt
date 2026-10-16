@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
                     when (actualPage) {
                         "Welcome" -> OnboardingScreen({ page = it }, { update { it.copy(onboardingDone = true) } }, { test(false) })
                         "Home" -> {
-                            HomeScreen(settings, alerts, update, { page = it }, test, status.ready)
+                            HomeScreen(settings, alerts, update, { page = it }, test, status.ready && settings.notificationDisclosureAccepted)
                             Section("Setup status") {
                                 Text("Notification Access: ${status.listener}\nNotifications: ${status.notifications}\nBattery exempt: ${status.batteryExempt}\nFull-screen: ${status.fullScreen}\nDND access: ${status.dndAccess}")
                             }
@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                         "History" -> AlertHistoryScreen(alerts) { uiScope.launch {
                             runCatching { app.history.clear() }.onFailure { snackbar.showSnackbar("Could not clear history.") }
                         } }
-                        "Setup" -> SetupScreen(this@MainActivity, status, requestNotifications)
+                        "Setup" -> SetupScreen(this@MainActivity, status, requestNotifications, settings, update)
                         "Privacy" -> PrivacyScreen()
                     }
                     Spacer(Modifier.height(24.dp))

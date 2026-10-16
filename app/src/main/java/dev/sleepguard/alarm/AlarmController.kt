@@ -62,6 +62,6 @@ class AlarmController(private val app: GuardApplication) {
         }
     }
     suspend fun test() = trigger(AlertTrigger(UUID.randomUUID().toString(), System.currentTimeMillis(),
-        app.packageName, "Sleep Guard · test", "Test sender", "Alarm check", "Sakib Esrat", "test message",
-        "Sakib Esrat, this is your local test alarm.", test = true))
+        app.packageName, "Sleep Guard · test", "Test sender", "Alarm check", "Test keyword", "test message",
+        "Test keyword, this is your local test alarm.", test = true))
 }

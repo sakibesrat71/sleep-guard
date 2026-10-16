@@ -7,10 +7,11 @@ import kotlinx.serialization.Serializable
 @Serializable data class GuardSettings(
     val enabled: Boolean = false,
     val schedule: SleepSchedule = SleepSchedule(),
-    val keywords: List<Keyword> = listOf(Keyword("1", "Sakib Esrat"), Keyword("2", "Sakib"), Keyword("3", "@Sakib Esrat")),
+    val keywords: List<Keyword> = emptyList(),
     val packages: Set<String> = setOf("com.microsoft.teams", "com.Slack"),
     val cooldownMinutes: Int = 0,
-    val onboardingDone: Boolean = false
+    val onboardingDone: Boolean = false,
+    val notificationDisclosureAccepted: Boolean = false
 )
 data class TextField(val name: String, val text: String)
 data class NotificationEvent(

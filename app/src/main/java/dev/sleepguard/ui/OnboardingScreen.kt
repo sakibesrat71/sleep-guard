@@ -2,6 +2,10 @@ package dev.sleepguard.ui
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import androidx.core.net.toUri
+import dev.sleepguard.BuildConfig
 
 @Composable fun OnboardingScreen(navigate: (String) -> Unit, finish: () -> Unit, test: () -> Unit) {
     Section("Welcome to Sleep Guard") {
@@ -16,12 +20,17 @@ import androidx.compose.runtime.Composable
     }
 }
 @Composable fun PrivacyScreen() {
+    val context = LocalContext.current
     Section("Private by design") {
-        Text("Sleep Guard 1.0 · Kotlin / Compose")
+        Text("Sleep Guard ${BuildConfig.VERSION_NAME} · EN corporation")
         Text("Notification text is processed entirely on this Android phone. There is no backend, internet permission, analytics, advertising, AI, cloud sync, or account sign-in.")
         Text("Only Microsoft Teams and Slack notifications selected by you are examined. Matching is deterministic and case-insensitive. Notification Access is powerful: Android grants access broadly, but Sleep Guard filters to these selected apps before extracting text.")
         Text("Up to 100 recent alarm records, including available message text and sender, are stored in private app storage. Clear them from Recent Alerts. Android backup is disabled. Uninstalling removes local data.")
         Text("Alarm details can appear on your lock screen when full-screen alarm access is allowed. Notification previews themselves hide the private message body. Opening the source app uses its original notification destination when available.")
         Text("No message bodies are written to logs. Debug builds log only generic processing results. Sleep Guard never reads Slack or Teams databases or uses Accessibility.")
+        Text("Support: sakibesrat71@gmail.com")
+        TextButton(onClick = { runCatching {
+            context.startActivity(Intent(Intent.ACTION_VIEW, "https://sakibesrat71.github.io/sleep-guard/privacy.html".toUri()))
+        } }) { Text("Full privacy policy · opens browser") }
     }
 }

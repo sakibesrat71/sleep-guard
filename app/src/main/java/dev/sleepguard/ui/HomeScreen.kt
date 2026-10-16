@@ -9,7 +9,7 @@ import java.time.LocalTime
 @Composable fun HomeScreen(settings: GuardSettings, alerts: List<AlertTrigger>, update: SettingsChange,
     navigate: (String) -> Unit, test: (Boolean) -> Unit, ready: Boolean) {
     Section("Your night, protected") {
-        Text(if (!settings.enabled) "OFF" else if (ScheduleChecker.isActive(settings.schedule, LocalTime.now())) "ON · monitoring now" else "ON · waiting for sleep window",
+        Text(if (!settings.enabled) "OFF" else if (!settings.notificationDisclosureAccepted) "ON · consent required in Setup" else if (settings.keywords.none { it.enabled }) "ON · add a keyword" else if (ScheduleChecker.isActive(settings.schedule, LocalTime.now())) "ON · monitoring now" else "ON · waiting for sleep window",
             style = MaterialTheme.typography.headlineSmall)
         Toggle("Enable Sleep Guard", settings.enabled, { value -> update { it.copy(enabled = value) } })
         Text(if (settings.schedule.allDay) "Monitor all day" else "${formatMinute(settings.schedule.startMinute)} → ${formatMinute(settings.schedule.endMinute)}")

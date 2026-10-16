@@ -10,7 +10,7 @@ class NotificationProcessor(
     private val cooldown: ConversationCooldown = ConversationCooldown()
 ) {
     fun process(event: NotificationEvent, settings: GuardSettings, time: LocalTime, elapsed: Long): AlertTrigger? {
-        if (!settings.enabled || event.packageName !in settings.packages ||
+        if (!settings.enabled || !settings.notificationDisclosureAccepted || event.packageName !in settings.packages ||
             MonitoredApps.supported.none { it.packageName == event.packageName } ||
             !ScheduleChecker.isActive(settings.schedule, time)) return null
         val match = matcher.match(event.fields, settings.keywords) ?: return null

@@ -26,7 +26,7 @@ class SleepGuardNotificationListenerService : NotificationListenerService() {
             for (sbn in queue) {
                 try {
                     val settings = app.settings.settings.first()
-                    if (!settings.enabled || sbn.packageName !in settings.packages) continue
+                    if (!settings.enabled || !settings.notificationDisclosureAccepted || sbn.packageName !in settings.packages) continue
                     for (event in extractor.extract(sbn)) {
                         val alert = processor.process(event, settings, LocalTime.now(), SystemClock.elapsedRealtime()) ?: continue
                         app.alarms.trigger(alert, sbn.notification.contentIntent)
