@@ -6,7 +6,8 @@ import org.junit.Test
 import java.time.LocalTime
 
 class NotificationProcessorTest {
-    private val settings = GuardSettings(enabled = true)
+    private val settings = GuardSettings(enabled = true, notificationDisclosureAccepted = true,
+        keywords = listOf(Keyword("1", "Sakib Esrat")))
     private fun event(text: String, pkg: String = "com.microsoft.teams", identity: String? = null) = NotificationEvent(
         pkg, "notification-42", 1000, "John Smith", "Production", listOf(TextField("message", text)), identity)
     private fun process(p: NotificationProcessor, e: NotificationEvent, s: GuardSettings = settings, elapsed: Long = 1000) =
@@ -21,6 +22,7 @@ class NotificationProcessorTest {
     @Test fun disabledOutsideScheduleAndOtherAppsIgnored() {
         val e = event("Sakib Esrat")
         assertNull(process(NotificationProcessor(), e, settings.copy(enabled = false)))
+        assertNull(process(NotificationProcessor(), e, settings.copy(notificationDisclosureAccepted = false)))
         assertNull(process(NotificationProcessor(), e, settings.copy(packages = emptySet())))
         assertNull(process(NotificationProcessor(), e, settings.copy(schedule = SleepSchedule(9 * 60, 17 * 60))))
         assertNull(process(NotificationProcessor(), event("Sakib Esrat", "attacker.app"), settings.copy(packages = setOf("attacker.app"))))
