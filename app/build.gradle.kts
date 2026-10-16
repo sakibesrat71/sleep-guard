@@ -11,8 +11,8 @@ android {
         applicationId = "dev.sleepguard"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
@@ -22,7 +22,20 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     testOptions { unitTests.isIncludeAndroidResources = true }
-    buildTypes { release { isMinifyEnabled = false } }
+    val uploadStorePath = providers.environmentVariable("SLEEP_GUARD_UPLOAD_STORE_FILE").orNull
+    signingConfigs {
+        if (uploadStorePath != null) create("upload") {
+            storeFile = file(uploadStorePath)
+            storePassword = providers.environmentVariable("SLEEP_GUARD_UPLOAD_PASSWORD").get()
+            keyAlias = "sleepguard-upload"
+            keyPassword = providers.environmentVariable("SLEEP_GUARD_UPLOAD_PASSWORD").get()
+            storeType = "PKCS12"
+        }
+    }
+    buildTypes { release {
+        isMinifyEnabled = false
+        if (uploadStorePath != null) signingConfig = signingConfigs.getByName("upload")
+    } }
 }
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2025.05.01"))
